@@ -1,0 +1,646 @@
+/* ==========================================================================
+   Receipt — a physical-style paper receipt.
+   Deliberately plain CSS with hex colours (not Tailwind utilities) so the
+   on-screen receipt, the print view and the exported PNG/PDF all render from
+   exactly the same rules.
+   ========================================================================== */
+
+.rc-capture {
+  --rc-ink: #14161a;
+  --rc-teal: #2f6f62;
+  --rc-teal-deep: #1d4a41;
+  --rc-amber: #e2a33d;
+  --rc-amber-ink: #7a5316;
+  --rc-rust: #b5482e;
+  --rc-slate: #6b7280;
+  --rc-line: #dcdde1;
+  --rc-paper: #fffefc;
+  --rc-stage: #eef0f2;
+
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(14px, 4vw, 28px) clamp(10px, 3vw, 24px) clamp(18px, 4.5vw, 32px);
+  background: var(--rc-stage);
+  display: flex;
+  justify-content: center;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  color: var(--rc-ink);
+  -webkit-font-smoothing: antialiased;
+}
+.rc-capture *,
+.rc-capture *::before,
+.rc-capture *::after {
+  box-sizing: border-box;
+}
+
+/* The sheet: everything that makes up the paper. The drop-shadow follows the
+   torn edge and the perforation holes because it's a filter, not a box-shadow. */
+.rc-sheet {
+  --hole: 9px;
+  width: min(100%, 30em);
+  font-size: clamp(12px, 3.5vw, 14px);
+  line-height: 1.45;
+  filter: drop-shadow(0 1px 1px rgba(20, 22, 26, 0.1)) drop-shadow(0 14px 22px rgba(20, 22, 26, 0.13));
+  animation: rc-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (min-width: 1024px) {
+  .rc-sheet {
+    font-size: 15px;
+  }
+}
+
+/* ---- torn edges ---- */
+.rc-tear {
+  height: 7px;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+}
+.rc-tear--top {
+  background: var(--rc-teal);
+}
+.rc-tear--bottom {
+  background: var(--rc-paper);
+  -webkit-mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  mask: conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+}
+
+/* ---- paper segments, separated by perforations ---- */
+.rc-seg {
+  --rt: 0.1px; /* hole radius at the top corners */
+  --rb: 0.1px; /* hole radius at the bottom corners */
+  position: relative;
+  background-color: var(--rc-paper);
+  background-image: repeating-linear-gradient(0deg, rgba(20, 22, 26, 0.014) 0 1px, transparent 1px 3px);
+  -webkit-mask:
+    radial-gradient(circle var(--rt) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--rt) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--rb) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--rb) at 100% 100%, #0000 98%, #000) bottom right;
+  -webkit-mask-size: 51% 51%;
+  -webkit-mask-repeat: no-repeat;
+  mask:
+    radial-gradient(circle var(--rt) at 0 0, #0000 98%, #000) top left,
+    radial-gradient(circle var(--rt) at 100% 0, #0000 98%, #000) top right,
+    radial-gradient(circle var(--rb) at 0 100%, #0000 98%, #000) bottom left,
+    radial-gradient(circle var(--rb) at 100% 100%, #0000 98%, #000) bottom right;
+  mask-size: 51% 51%;
+  mask-repeat: no-repeat;
+}
+.rc-seg--has-bottom-holes {
+  --rb: var(--hole);
+}
+.rc-seg--has-top-holes {
+  --rt: var(--hole);
+}
+.rc-seg--has-top-holes::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--hole) + 6px);
+  right: calc(var(--hole) + 6px);
+  top: 0;
+  border-top: 2px dashed var(--rc-line);
+}
+
+/* ---- header ---- */
+.rc-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9em;
+  padding: 1.25em 1.4em 1.3em;
+  color: #fff;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(226, 163, 61, 0.28), transparent 55%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 2px, transparent 2px 9px),
+    linear-gradient(160deg, var(--rc-teal) 0%, var(--rc-teal-deep) 100%);
+  border-bottom: 3px solid var(--rc-amber);
+}
+.rc-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  min-width: 0;
+}
+.rc-logo {
+  flex: none;
+  width: 3.1em;
+  height: 3.1em;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.22);
+}
+.rc-logo img {
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+}
+.rc-brand-name {
+  margin: 0;
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-size: 1.55em;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0.005em;
+}
+.rc-brand-sub {
+  margin: 0.3em 0 0;
+  font-size: 0.78em;
+  line-height: 1.3;
+  opacity: 0.82;
+  overflow-wrap: anywhere;
+}
+.rc-doc-tag {
+  flex: none;
+  text-align: right;
+  font-size: 0.68em;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  opacity: 0.95;
+}
+.rc-doc-tag span {
+  display: block;
+  color: var(--rc-amber);
+}
+
+/* ---- hero amount ---- */
+.rc-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 0.6em;
+  padding: 1.6em 1.4em 1.6em;
+}
+.rc-hero-main {
+  min-width: 0;
+}
+.rc-hero-foot {
+  grid-column: 1 / -1;
+  margin-top: 0.5em;
+}
+.rc-eyebrow {
+  margin: 0;
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--rc-slate);
+}
+.rc-amount--md {
+  font-size: 2.5em !important;
+}
+.rc-amount {
+  margin: 0.25em 0 0;
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-weight: 500;
+  font-size: 3.1em;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.rc-cur {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.55em;
+  font-weight: 500;
+  vertical-align: 0.5em;
+  margin-right: 0.08em;
+  color: var(--rc-teal);
+}
+.rc-paise {
+  font-size: 0.5em;
+  color: var(--rc-slate);
+}
+.rc-words {
+  margin: 0.55em 0 0;
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-style: italic;
+  font-size: 0.88em;
+  color: #4b5058;
+}
+.rc-when {
+  margin: 0.6em 0 0;
+  font-size: 0.82em;
+  color: var(--rc-slate);
+  font-variant-numeric: tabular-nums;
+}
+.rc-chips {
+  margin-top: 0.9em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+.rc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.32em 0.85em;
+  border-radius: 999px;
+  font-size: 0.74em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--rc-line);
+  color: #4b5058;
+  background: #fafafa;
+}
+.rc-chip i {
+  width: 0.62em;
+  height: 0.62em;
+  border-radius: 50%;
+  background: currentColor;
+}
+.rc-chip--ok {
+  color: var(--rc-teal);
+  border-color: rgba(47, 111, 98, 0.35);
+  background: rgba(47, 111, 98, 0.08);
+}
+.rc-chip--warn {
+  color: var(--rc-amber-ink);
+  border-color: rgba(226, 163, 61, 0.5);
+  background: rgba(226, 163, 61, 0.14);
+}
+.rc-chip--bad {
+  color: var(--rc-rust);
+  border-color: rgba(181, 72, 46, 0.35);
+  background: rgba(181, 72, 46, 0.08);
+}
+
+/* ---- stamp ---- */
+.rc-stamp {
+  flex: none;
+  width: 6.9em;
+  height: 6.9em;
+  margin-right: -0.3em;
+  color: var(--rc-teal);
+  transform: rotate(-14deg);
+  opacity: 0.92;
+  pointer-events: none;
+  animation: rc-stamp 0.6s cubic-bezier(0.2, 0.9, 0.25, 1) 0.4s both;
+}
+.rc-stamp--warn {
+  color: #b9801f;
+}
+.rc-stamp--bad {
+  color: var(--rc-rust);
+}
+.rc-stamp svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---- body sections ---- */
+.rc-body {
+  padding: 1.5em 1.4em 1.4em;
+}
+.rc-section + .rc-section {
+  margin-top: 1.35em;
+}
+.rc-h {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  margin: 0 0 0.6em;
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rc-teal);
+}
+.rc-h::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rc-line);
+}
+
+.rc-rows {
+  margin: 0;
+  display: grid;
+  gap: 0.45em;
+}
+.rc-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.8em;
+}
+.rc-row dt {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5em;
+  margin: 0;
+  color: var(--rc-slate);
+  font-size: 0.86em;
+  white-space: nowrap;
+}
+.rc-row dt::after {
+  content: "";
+  flex: 1;
+  min-width: 0.8em;
+  height: 0.7em;
+  border-bottom: 1.5px dotted #c9cbd1;
+}
+.rc-row dd {
+  flex: 0 1 auto;
+  max-width: 62%;
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.rc-row dd small {
+  display: block;
+  margin-top: 0.1em;
+  font-size: 0.8em;
+  font-weight: 400;
+  color: var(--rc-slate);
+}
+.rc-mono {
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  letter-spacing: 0.01em;
+}
+
+.rc-person {
+  margin: 0;
+  display: grid;
+  gap: 0.15em;
+}
+.rc-person strong {
+  font-size: 1.08em;
+  font-weight: 600;
+}
+.rc-person span {
+  font-size: 0.86em;
+  color: #4b5058;
+  overflow-wrap: anywhere;
+}
+
+.rc-note {
+  margin: 0.7em 0 0;
+  padding: 0.65em 0.85em;
+  border-left: 3px solid var(--rc-amber);
+  background: rgba(226, 163, 61, 0.1);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.84em;
+  color: #5b4a2b;
+  overflow-wrap: anywhere;
+}
+
+/* line items */
+.rc-items {
+  margin: 0.7em 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35em;
+  font-size: 0.9em;
+}
+.rc-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+}
+.rc-items li span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rc-items li span:last-child {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* totals */
+.rc-totals {
+  margin: 0.95em 0 0;
+  padding-top: 0.8em;
+  border-top: 1.5px solid var(--rc-ink);
+  display: grid;
+  gap: 0.4em;
+}
+.rc-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+}
+.rc-total span:first-child {
+  color: var(--rc-slate);
+}
+.rc-total span:last-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rc-total--this {
+  margin: 0.15em -0.55em;
+  padding: 0.55em 0.55em;
+  border-radius: 8px;
+  background: rgba(47, 111, 98, 0.1);
+  font-size: 1.05em;
+}
+.rc-total--this span:first-child,
+.rc-total--this span:last-child {
+  color: var(--rc-teal);
+  font-weight: 700;
+}
+.rc-total--balance {
+  padding-top: 0.55em;
+  border-top: 1.5px dashed var(--rc-line);
+}
+.rc-total--balance span:last-child {
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+.rc-total--due span:last-child {
+  color: var(--rc-rust);
+}
+.rc-total--clear span:last-child {
+  color: var(--rc-teal);
+}
+.rc-settled {
+  margin: 0.9em 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* ---- footer stub ---- */
+.rc-foot {
+  padding: 1.6em 1.4em 1.5em;
+}
+.rc-foot-top {
+  display: flex;
+  align-items: center;
+  gap: 1.1em;
+}
+.rc-qr {
+  flex: none;
+  width: 6.6em;
+  text-align: center;
+}
+.rc-qr img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0.3em;
+  border: 1px solid var(--rc-line);
+  border-radius: 8px;
+  background: #fff;
+  image-rendering: pixelated;
+}
+.rc-qr span {
+  display: block;
+  margin-top: 0.35em;
+  font-size: 0.62em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rc-slate);
+}
+.rc-thanks {
+  min-width: 0;
+}
+.rc-thanks h4 {
+  margin: 0;
+  font-family: "Fraunces", ui-serif, Georgia, serif;
+  font-size: 1.5em;
+  font-weight: 500;
+  line-height: 1.1;
+}
+.rc-thanks p {
+  margin: 0.45em 0 0;
+  font-size: 0.8em;
+  color: #4b5058;
+}
+.rc-barcode {
+  margin-top: 1.3em;
+  text-align: center;
+}
+.rc-barcode svg {
+  display: block;
+  width: 100%;
+  height: 3.6em;
+}
+.rc-barcode span {
+  display: block;
+  margin-top: 0.4em;
+  font-size: 0.74em;
+  letter-spacing: 0.32em;
+  color: #4b5058;
+  overflow-wrap: anywhere;
+}
+.rc-fine {
+  margin: 1.1em 0 0;
+  text-align: center;
+  font-size: 0.66em;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: #8a8f98;
+}
+
+/* ---- narrow phones ---- */
+@media (max-width: 360px) {
+  .rc-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .rc-doc-tag {
+    text-align: left;
+  }
+  .rc-stamp {
+    width: 5.4em;
+    height: 5.4em;
+  }
+  .rc-foot-top {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* ---- motion ---- */
+@keyframes rc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rc-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-14deg) scale(2);
+  }
+  55% {
+    opacity: 1;
+    transform: rotate(-14deg) scale(0.93);
+  }
+  100% {
+    opacity: 0.92;
+    transform: rotate(-14deg) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rc-sheet,
+  .rc-stamp {
+    animation: none;
+  }
+}
+/* Captured for PNG/PDF: no animation, so the image is always the finished receipt. */
+.rc-exporting .rc-sheet,
+.rc-exporting .rc-stamp {
+  animation: none !important;
+}
+
+/* ---- print: only the receipt, on a clean white page ---- */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .rc-capture,
+  .rc-capture * {
+    visibility: visible !important;
+  }
+  .rc-capture {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0 !important;
+    background: #fff !important;
+    --rc-stage: #fff;
+  }
+  .rc-sheet {
+    width: 30em;
+    font-size: 10.5px; /* keeps the whole receipt on one A4 page */
+    break-inside: avoid;
+    animation: none !important;
+    filter: none !important;
+  }
+  .rc-stamp {
+    animation: none !important;
+    opacity: 0.92 !important;
+  }
+  .rc-sheet,
+  .rc-sheet * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

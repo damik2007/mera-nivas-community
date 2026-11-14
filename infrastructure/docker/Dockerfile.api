@@ -1,0 +1,28 @@
+FROM node:20-bookworm-slim
+WORKDIR /repo
+
+COPY package.json package-lock.json* ./
+COPY apps/api/package.json apps/api/package.json
+COPY packages/database/package.json packages/database/package.json
+COPY packages/auth/package.json packages/auth/package.json
+COPY packages/validation/package.json packages/validation/package.json
+COPY packages/qr/package.json packages/qr/package.json
+COPY packages/payments/package.json packages/payments/package.json
+COPY packages/notifications/package.json packages/notifications/package.json
+
+RUN npm install --workspaces --include-workspace-root --no-audit --no-fund
+
+COPY apps/api apps/api
+COPY packages/database packages/database
+COPY packages/auth packages/auth
+COPY packages/validation packages/validation
+COPY packages/qr packages/qr
+COPY packages/payments packages/payments
+COPY packages/notifications packages/notifications
+
+EXPOSE 4000
+ENV NODE_ENV=production
+
+# Runs via tsx (TypeScript executed directly) for simplicity. Swap for a
+# compiled `node dist/index.js` once you set up a build pipeline.
+CMD ["npx", "tsx", "apps/api/src/index.ts"]

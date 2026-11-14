@@ -1,0 +1,5 @@
+Terms and Privacy pages (ready to upload, no build needed)
+1. Upload terms.html and privacy.html into public_html/mycommunity/ (next to index.html).
+2. Open kushalreddy.me/mycommunity/terms.html and /privacy.html to check.
+The login-page link ("By signing in, you accept...") appears after you rebuild/redeploy the app
+(npm run build:deploy). The build copies these two pages automatically, so after that no manual upload is needed.

@@ -1,0 +1,28 @@
+{
+  "name": "@mycommunity/database",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/client.ts",
+  "types": "src/client.ts",
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "create-admin": "tsx src/create-admin.ts",
+    "studio": "drizzle-kit studio",
+    "admin-sql": "tsx src/make-admin-sql.ts"
+  },
+  "dependencies": {
+    "mysql2": "^3.11.3",
+    "drizzle-orm": "^0.33.0",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.24.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "bcryptjs": "^2.4.3",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}

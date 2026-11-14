@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Explicitly include the shared UI package so its utility classes aren't purged. */
+@source "../../../packages/ui/src";
+
+@theme {
+  /* Mera Nivas palette: near-black ink on white paper, teal + amber as the only accents. */
+  --color-ink: #14161a;
+  --color-paper: #ffffff;
+  --color-surface: #f7f7f8;
+  --color-teal: #2f6f62;
+  --color-amber: #e2a33d;
+  --color-amber-ink: #7a5316;
+  --color-rust: #b5482e;
+  --color-slate: #6b7280;
+  --color-line: #e5e5e8;
+
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Browsers don't make form controls inherit the page font by default — every
+   button, input, select and textarea was silently falling back to the OS's
+   generic UI font instead of Inter, even though the rest of the page used it
+   correctly. This is why text across the app could look inconsistent. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Respect reduced-motion preferences site-wide. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visible keyboard focus ring everywhere, using the brand teal. */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}

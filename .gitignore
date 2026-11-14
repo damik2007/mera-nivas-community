@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+packages/database/drizzle/*.sql.bak
+apps/api/uploads/
+apps/api/server.cjs
+deploy/
+admin-setup.sql
+.env.production
