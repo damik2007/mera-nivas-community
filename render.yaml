@@ -1,0 +1,28 @@
+services:
+  - type: web
+    runtime: node
+    name: mera-nivas-api
+    repo: https://github.com/damik2007/mera-nivas-community.git
+    plan: free
+    branch: main
+    buildCommand: npm install --workspaces --include-workspace-root && npm run build:api
+    startCommand: node deploy/api/app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: PAYMENT_PROVIDER
+        value: mock
+      - key: GOOGLE_CLIENT_ID
+        value: 14775540596-ff0qdv4r8oq6nd23deg8eaq29nqsqm5b.apps.googleusercontent.com
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: QR_SIGNING_SECRET
+        generateValue: true
+      - key: PASSWORD_RESET_SECRET
+        generateValue: true
