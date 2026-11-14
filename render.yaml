@@ -5,7 +5,7 @@ services:
     repo: https://github.com/damik2007/mera-nivas-community.git
     plan: free
     branch: main
-    buildCommand: npm install --workspaces --include-workspace-root && npm run build:api
+    buildCommand: npm install --include=dev --workspaces --include-workspace-root && npm run build:api
     startCommand: node deploy/api/app.js
     envVars:
       - key: NODE_ENV
